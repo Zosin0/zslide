@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZSlide</title>
+    <!-- Adicionando o html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+  </head>
+  <body>
+    <div style="display: flex; width: 1000px; height: 600px">
+      <textarea id="md" style="flex: 1; resize: none"></textarea>
+      <div id="render" style="flex: 1; overflow-y: auto"></div>
+    </div>
+    
+    <button id="exportPdf">Export as PDF</button>
+
+    <script type="module">
+      import { Marp } from 'https://esm.sh/@marp-team/marp-core?bundle'
+      import browser from 'https://esm.sh/@marp-team/marp-core/browser'
+
+      const marp = new Marp({ script: false, html: true,   minifyCSS: true})
+
+      // Renderiza o Markdown em HTML conforme o usuário digita
+      md.addEventListener('input', () => {
+        const { html, css } = marp.render(md.value)
+        render.innerHTML = `${html}<style>${css}</style>`
+        browser(render) // Post-process for browser to apply auto scaling
+      })
+
+      // Função para exportar como PDF usando html2pdf.js
+      document.getElementById('exportPdf').addEventListener('click', () => {
+        // Configurações do PDF
+        const opt = {
+          margin:       0.3,
+          filename:     'slides.pdf',
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2 },
+          jsPDF:        { unit: 'in', format: [4,3], orientation: 'landscape' },
+          enableLinks: true // Habilita links clicáveis no PDF;
+
+        };
+
+        // Captura o conteúdo renderizado e exporta como PDF
+        html2pdf().from(render).set(opt).save();
+      });
+    </script>
+  </body>
+</html>
